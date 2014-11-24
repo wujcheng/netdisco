@@ -1,0 +1,63 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: ubuntu-12.04
+
+suites:
+  - name: default
+    driver: 
+      vm_hostname: netdisco.chef-demo.com
+      network:
+        - ["private_network", {ip: "192.168.17.17"}]
+    run_list:
+      - recipe[apt]
+      - recipe[netdisco::default]
+    attributes:
+      #set compiletime to true = workaround for installing the pg gem
+      build_essential:
+        compiletime: true
+      postgresql:
+        #TODO is it possible to append to an existing attribute in YAML
+        #     first 4 items here are copied from the postgres cookbook
+        pg_hba:
+          -
+            type: 'local'
+            db: 'all'
+            user: 'postgres'
+            addr:
+            method: 'ident'
+          -
+            type: 'local'
+            db: 'all'
+            user: 'all'
+            addr:
+            method: 'ident'
+          -
+            type: 'host'
+            db: 'all'
+            user: 'all'
+            addr: '127.0.0.1/32'
+            method: 'md5'
+          -
+            type: 'host'
+            db: 'all'
+            user: 'all'
+            addr: '::1/128'
+            method: 'md5'
+          -
+            type: 'local'
+            db: 'template1'
+            user: 'all'
+            addr: 
+            method: 'ident'
+          -
+            type: 'local'
+            db: 'sameuser'
+            user: 'all'
+            addr: 
+            method: 'md5'

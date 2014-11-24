@@ -1,0 +1,13 @@
+name             'netdisco'
+maintainer       'Mike Tyler'
+maintainer_email 'mtyler@getchef.com'
+license          'all_rights'
+description      'Installs/Configures netdisco'
+long_description 'Installs/Configures netdisco'
+version          '0.1.0'
+
+depends 'postgresql', '~> 3.4.12'
+depends 'database', '~> 2.3.0'
+depends 'apt', '~> 2.6.0'
+depends 'line'
+depends 'httpd', '~> 0.1.5'

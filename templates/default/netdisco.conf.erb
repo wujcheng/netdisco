@@ -1,0 +1,229 @@
+# n e t  d i s c o
+# Config File 
+# $Id$
+# See README for the possible configuration options and their values.
+#
+# Syntax: Multiple Items are separated by commas
+#         Escape ,#$ characters with a \
+#         Can split over multiple lines with a trailing \
+#
+# Variable Expansion:
+#         You can use existing variables after defining them
+#            eg. topofile=$home/mytopo.txt
+
+# ---- General Settings ----
+domain              = .mycompany.com
+home                = /usr/local/netdisco
+#customer           = mycompany
+#customericon       = mycompany.gif,88,31
+#node_monitor_email = admin@your.company
+topofile            = netdisco-topology.txt
+timeout             = 180
+macsuck_timeout     = 240
+#macsuck_all_vlans  = true
+macsuck_no_vlan     = fddi-default,token-ring-default,fddinet-default,trnet-default
+#macsuck_no         =
+#macsuck_only       =
+#macsuck_min_age    =
+#macsuck_no_unnamed =
+#discover_no        =
+#discover_no_type   = cisco\s+AIR-LAP
+#discover_only      =
+#discover_min_age   =
+#arpnip_no          = 192.168.5.5,192.168.0.0/24,192.168.2.1,192.168.5.0/26
+#arpnip_only        =
+#arpnip_min_age     =
+
+# interfaces with names matching these items will skipped in discovery
+ignore_interfaces = EOBC,unrouted VLAN,StackPort,Control Plane Interface,SPAN (S|R)P Interface,StackSub
+
+# The module inventory code can be expensive, since these tables
+# can be large.  Uncomment this to turn off this feature.
+#store_modules   = false
+#
+# The wireless client code is specific to Cisco standalone APs;
+# if you don't have any of these, you can skip it altogether.
+store_wireless_client = true
+
+# Enable parallel mode.  Set to the number of processes you would like to run simultaneously.
+# If not running parallel mode, consider decreasing timeout values to lower walk times
+#
+# You may need to increase the number of connections in postgresql.conf
+# See max_connections here : http://www.postgresql.org/docs/8.2/static/runtime-config-connection.html
+#
+# And you may need to increase kernel shared memory space for Postgres
+# See http://www.postgresql.org/docs/8.2/static/kernel-resources.html for details
+max_procs       = 10
+
+# -- Database Maintenance and Data Removal --
+expire_devices       = 60
+expire_nodes         = 90
+expire_nodes_archive = 60
+expire_processes     = 1
+
+# Uncomment this if running on older PostgreSQL < 8.1, netdisco
+# application will vacuum tables for you
+#vacuum = true
+
+# ---- Admin Panel Daemon Settings ----
+daemon_bg       = true
+daemon_pid      = netdisco_daemon.pid
+daemon_poll     = 2
+
+# ---- Port Control Settings ---
+#vlanctl             = true
+#portctl_email       = abuse@your.company
+#portctl_nophones    = true
+portctl_timeout      = 60
+#---- These next two are really dangerous. Beware.
+#portctl_uplinks     = false
+#portctl_vlans       = false
+
+# Data Archiving and Logging
+compresslogs    = true
+compress        = /usr/bin/gzip -f
+datadir         = data
+logextension    = txt
+#nmis_dump       = netdisco_nmis
+
+# ---- Web Settings ----
+port_info            = false
+secure_server        = false
+#web_console_models  = wsc1900,wsc1900c
+#web_console_vendors = cisco,hp
+webpath              = /netdisco
+websession           = 90
+#traceroute          = true
+
+# ---- User Authentication Settings ----
+# Use web server supplied authentication
+#apache_auth          = true
+# Use LDAP authentication see LDAP Settings below
+
+# ---- Database Settings ----
+# Note:
+#   If you use a database name other than netdisco
+#   You must change all the pg_* files in sql/
+db_Pg           = dbi:Pg:dbname=netdisco
+db_Pg_user      = netdisco
+db_Pg_pw        = <%= node['netdisco']['database']['password']%>
+db_Pg_opts      = PrintError => 1, AutoCommit => 1
+# Postgres errors like "invalid byte sequence for encoding",
+#   are because of non UTF-8 characters present in device module data or
+#   Net-BIOS data.  Since most Postgres installs default to UTF8 these days,
+#   we set the encoding to iso8859-1.  This helps when importing oui.txt too.
+db_Pg_env       = PGCLIENTENCODING => iso8859-1
+
+#db_Oracle      = dbi:Oracle:host=server.company.com:sid=SIDHERE;port=1521
+#db_Oracle_user = netdisco
+#db_Oracle_pw   = password
+#db_Oracle_opts = PrintError => 0
+#db_Oracle_env  = ORACLE_HOME => /usr/local/orcale7
+
+# ---- SNMP Settings ----
+community       = public,public2,public3
+community_rw    = private1,private2,private3
+v3_users        = netdisco
+v3_users_rw     = netdisco
+v3_user         = netdisco:auth,enc:SHA:disconet:AES:disconet
+snmpver         = 2
+# Use external program to get community string for a device
+# variables are %IP% = ip-address, %HOST% = hostname
+#get_community   = ./get_com %IP%
+# snmptimeout in micro-seconds before retry, 1000000 micro-seconds = 1 second
+snmptimeout     = 1000000 
+#snmpdiscover_timeout = 1000000
+snmpretries     = 3
+#If you want to use a Net-SNMP configuration file uncomment and set to 0
+#ignoresnmpconf = 1
+mibdirs         = \
+    $home/mibs/allied, \
+    $home/mibs/apc, \
+    $home/mibs/arista, \
+    $home/mibs/aruba, \
+    $home/mibs/asante, \
+    $home/mibs/cabletron, \
+    $home/mibs/cisco, \
+    $home/mibs/cyclades, \
+    $home/mibs/dell, \
+    $home/mibs/enterasys, \
+    $home/mibs/extreme, \
+    $home/mibs/foundry, \
+    $home/mibs/hp, \
+    $home/mibs/juniper, \
+    $home/mibs/netscreen, \
+    $home/mibs/nortel, \
+    # Do not remove rfc or net-snmp. \
+    $home/mibs/rfc,     $home/mibs/net-snmp
+
+#bulkwalk_no    = vendor:foundry,model:blah,127.0.0.1/32,myswitch
+#bulkwalk_off   = true
+# If netdisco's automatic detection of buggy Net-SNMP versions
+# triggers incorrectly on your system, e.g., because your Net-SNMP
+# still reports itself as 5.3.1 but it is actually patched,
+# uncomment this:
+#bulkwalk_off   = false
+#bulkwalk_repeaters = 20
+
+# ---- LDAP Settings ----
+#ldap_server          = LDAP-Server-1,LDAP-Server-2
+#ldap_user_string     = cn=%USER%
+#ldap_base            = o=MYORGANIZATION
+#ldap_proxy_user      = anonymous
+#ldap_proxy_pass      = password
+#ldap_opts            = version => 3, debug => 0
+#ldap_tls_opts        = verify => 'none' , sslversion => 'tlsv1'
+
+# ---- Graph Settings ----
+edge_color      = wheat
+
+graph           = html/netmap.gif
+#graph_png       = html/netmap.png
+graph_bg        = black
+graph_clusters  = false  # try fdp layout
+graph_color     = white
+#graph_default  = svg
+#graph_dir      = net_dir.gif
+graph_epsilon   = 6
+graph_layout    = twopi  # try neato or fdp too
+graph_map       = html/netmap.map
+graph_overlap   = scale
+graph_nodesep   = 2
+graph_ranksep   = .3
+#graph_raw      = graph_raw.dot
+graph_splines   = false
+graph_svg       = html/netmap.svg
+graph_timeout   = 90
+graph_x         = 30
+graph_y         = 30
+
+node_fillcolor  = dimgrey
+node_font       = lucon
+node_fontsize   = 46.0
+node_fontcolor  = white
+node_problem    = red
+node_shape      = box
+node_style      = filled
+#edge_style      = setlinewidth(10)
+
+# ---- Node Maps ----
+#    variable:matching pattern:node attribute:attribute value:key:key name
+
+#   cat, not cat-g
+#node_map       = label:cat(?!-g):fillcolor:blue:cat:Blue Box - Catalyst Device
+#node_map       = label:-g:fillcolor:darkgreen:dev-g:Green Box - Gateway / Router
+#node_map       = ip:^192.168\.:color:yellow:dev:Yellow Border - ResNet
+
+
+# ---- Device view settings ----
+# Graphs column
+#col_graphs_show  = 1
+#col_graphs_noesc = 1
+#col_graphs_data  = graphs_sample.mas:col_graphs
+#col_graphs_img   = traffic.png
+#col_graphs_url   = http://path-to-your-tool.domain.com/graph-tool.cgi
+
+# Perform reverse lookups for IPv6 addresses? Can be slow, especially 
+# in Device View with link-local addresses or systems with RFC4941 Privacy 
+# Extensions enabled
+reverse_lookup_ipv6 = false 

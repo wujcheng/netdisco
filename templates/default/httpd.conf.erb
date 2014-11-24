@@ -1,0 +1,9 @@
+ProxyPreserveHost On
+ProxyPass / http://localhost:5000/ retry=0 timeout=60
+ProxyPassReverse / http://localhost:5000/
+ 
+ProxyRequests Off
+<Proxy *>
+  Order allow,deny
+  Allow from all
+</Proxy>
